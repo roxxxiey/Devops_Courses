@@ -1,0 +1,36 @@
+version: "2.4"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile_app
+      args:
+        APP_REPOSITORY_URL: "${APP_REPOSITORY_URL}"
+        APP_REPOSITORY_REF: "${APP_REPOSITORY_REF}"
+    env_file:
+      - .env
+    environment:
+      APP_HOST: "0.0.0.0"
+    ports:
+      - "127.0.0.1:${APP_PUBLIC_PORT}:${APP_PORT}"
+      - "127.0.0.1:${APP_SSH_PORT}:22"
+    cpus: "${CPU_LIMIT}"
+    pids_limit: "${PIDS_LIMIT}"
+
+  tester:
+    build:
+      context: .
+      dockerfile: Dockerfile_tester
+    depends_on:
+      - app
+    env_file:
+      - .env
+    working_dir: /work
+    ports:
+      - "127.0.0.1:${TESTER_SSH_PORT}:22"
+    volumes:
+      - ./ssh/generated:/work/ssh/generated
+      - ./logs:/work/logs
+    cpus: "${CPU_LIMIT}"
+    pids_limit: "${PIDS_LIMIT}"
