@@ -1,0 +1,26 @@
+FROM ubuntu:22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG PYTHON3_VERSION=3.10.6-1~22.04.1
+ARG PYTHON3_PIP_VERSION=22.0.2+dfsg-1ubuntu0.7
+ARG OPENSSH_SERVER_VERSION=1:8.9p1-3ubuntu0.15
+ARG OPENSSH_CLIENT_VERSION=1:8.9p1-3ubuntu0.15
+ARG CA_CERTIFICATES_VERSION=20240203~22.04.1
+ARG GIT_VERSION=1:2.34.1-1ubuntu1.17
+ARG APP_REPOSITORY_URL=https://github.com/pallets/flask.git
+ARG APP_REPOSITORY_REF=3.0.3
+
+RUN apt-get update && apt-get install -y --no-install-recommends python3=${PYTHON3_VERSION} python3-pip=${PYTHON3_PIP_VERSION} openssh-server=${OPENSSH_SERVER_VERSION} openssh-client=${OPENSSH_CLIENT_VERSION} ca-certificates=${CA_CERTIFICATES_VERSION} git=${GIT_VERSION} && rm -rf /var/lib/apt/lists/*
+
+COPY requirements_app.txt /tmp/requirements_app.txt
+RUN pip3 install --no-cache-dir --requirement /tmp/requirements_app.txt
+
+RUN git clone --depth 1 --branch "${APP_REPOSITORY_REF}" "${APP_REPOSITORY_URL}" /tmp/app-source
+COPY patches/app.patch /tmp/app.patch
+RUN cd /tmp/app-source && git apply /tmp/app.patch && mkdir -p /opt/webapp && cp -R app /opt/webapp/app && rm -rf /tmp/app-source /tmp/app.patch
+
+COPY scripts/start_app.sh /usr/local/bin/start_app.sh
+RUN chmod +x /usr/local/bin/start_app.sh && mkdir -p /run/sshd
+
+WORKDIR /opt/webapp
+CMD ["/usr/local/bin/start_app.sh"]

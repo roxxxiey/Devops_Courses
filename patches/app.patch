@@ -1,0 +1,57 @@
+diff --git a/app/__init__.py b/app/__init__.py
+new file mode 100644
+index 0000000..6ee2017
+--- /dev/null
++++ b/app/__init__.py
+@@ -0,0 +1 @@
++"""Demo application package for DevOps CI checks."""
+diff --git a/app/bad_code.py b/app/bad_code.py
+new file mode 100644
+index 0000000..2e11d58
+--- /dev/null
++++ b/app/bad_code.py
+@@ -0,0 +1,15 @@
++import math
++import json
++
++badDefault = []
++
++
++def BrokenFunction(a, b, c, d, e, f, list=[]):
++    try:
++        x = a + b
++    except Exception:
++        pass
++    unused_value = c + d + e + f
++    second_unused = math.pi
++    third_unused = badDefault
++    return list
+diff --git a/app/server.py b/app/server.py
+new file mode 100644
+index 0000000..783c998
+--- /dev/null
++++ b/app/server.py
+@@ -0,0 +1,23 @@
++import os
++
++from flask import Flask, jsonify
++
++app = Flask(__name__)
++
++
++@app.after_request
++def add_headers(response):
++    response.headers["X-DevOps-Project"] = "course-ci-container"
++    response.headers["X-Content-Type-Options"] = "nosniff"
++    return response
++
++
++@app.get("/health")
++def health():
++    return jsonify({"status": "ok"})
++
++
++if __name__ == "__main__":
++    host = os.getenv("APP_HOST", "0.0.0.0")
++    port = int(os.getenv("APP_PORT", "8080"))
++    app.run(host=host, port=port)
