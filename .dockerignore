@@ -1,0 +1,8 @@
+.git
+.env
+logs
+ssh/generated
+__pycache__
+*.pyc
+.pytest_cache
+.pylint.d
