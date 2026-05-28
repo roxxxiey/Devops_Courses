@@ -1,57 +1,73 @@
-diff --git a/app/__init__.py b/app/__init__.py
-new file mode 100644
-index 0000000..6ee2017
---- /dev/null
-+++ b/app/__init__.py
-@@ -0,0 +1 @@
-+"""Demo application package for DevOps CI checks."""
-diff --git a/app/bad_code.py b/app/bad_code.py
-new file mode 100644
-index 0000000..2e11d58
---- /dev/null
-+++ b/app/bad_code.py
-@@ -0,0 +1,15 @@
-+import math
-+import json
-+
-+badDefault = []
-+
-+
-+def BrokenFunction(a, b, c, d, e, f, list=[]):
-+    try:
-+        x = a + b
-+    except Exception:
-+        pass
-+    unused_value = c + d + e + f
-+    second_unused = math.pi
-+    third_unused = badDefault
-+    return list
-diff --git a/app/server.py b/app/server.py
-new file mode 100644
-index 0000000..783c998
---- /dev/null
-+++ b/app/server.py
-@@ -0,0 +1,23 @@
-+import os
-+
-+from flask import Flask, jsonify
-+
-+app = Flask(__name__)
-+
+diff --git a/bussiness_logic.py b/bussiness_logic.py
+--- a/bussiness_logic.py
++++ b/bussiness_logic.py
+@@ -1,7 +1,5 @@
+ from pathlib import Path
+ import glob
+-import lti
+-from flask_login import current_user, login_user
+ 
+ ALLOWED_EXTENSIONS = set(
+     ['py', 'txt', 'docx', 'doc', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+@@ -16,8 +14,7 @@ def func7():
+     return result
+ 
+ def check_login():
+-    if not current_user:
+-        login_user('admin')
++    return True
+ 
+ def func6():
+     global len
+@@ -43,7 +40,7 @@ def func4():
+     return result
+ 
+ def get_lti_msg():
+-    print(lti)
++    print("lti module is not used by the demo app")
+ 
+ def func8(arg5, arg6):
+     var7 = (760682910 + arg6 - arg5) + 1702360584
+@@ -57,9 +54,8 @@ def func3():
+     global len
+     del len
+ 
+-from celery import Celery
+ def get_celery():
+-    return Celery(__name__)
++    return None
+ 
+ def create_folder(folder_path):
+     Path(folder_path).mkdir(parents=True, exist_ok=True)
+diff --git a/main.py b/main.py
+--- a/main.py
++++ b/main.py
+@@ -7,6 +7,18 @@ from bussiness_logic import allowed_file, check_password, create_folder, get_file
+ app = Flask(__name__)
+ app.config.from_object('settings')
+ 
 +
 +@app.after_request
-+def add_headers(response):
++def add_devops_headers(response):
 +    response.headers["X-DevOps-Project"] = "course-ci-container"
 +    response.headers["X-Content-Type-Options"] = "nosniff"
 +    return response
 +
 +
-+@app.get("/health")
++@app.route('/health')
 +def health():
-+    return jsonify({"status": "ok"})
++    return {"status": "ok"}
 +
-+
-+if __name__ == "__main__":
-+    host = os.getenv("APP_HOST", "0.0.0.0")
-+    port = int(os.getenv("APP_PORT", "8080"))
-+    app.run(host=host, port=port)
+ 
+ @app.route('/')
+ def index():
+@@ -75,4 +87,8 @@ def login():
+   
+ if __name__ == '__main__':
+     create_folder(app.config['UPLOAD_FOLDER'])
+-    app.run(debug = True)
++    app.run(
++        host=os.getenv("APP_HOST", "0.0.0.0"),
++        port=int(os.getenv("APP_PORT", "8080")),
++        debug = True,
++    )

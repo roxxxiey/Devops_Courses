@@ -34,4 +34,4 @@ ssh-keygen -A
 /usr/sbin/sshd
 
 cd /opt/webapp
-exec python3 -m app.server
+exec python3 main.py

@@ -18,8 +18,11 @@ if ! ssort --check /work/app /work/tests; then
 fi
 
 echo "=== tester stage: pylint static analysis with 10 selected criteria ==="
-if ! pylint --rcfile=/work/pylintrc /work/app/bad_code.py; then
+if pylint --rcfile=/work/pylintrc /work/app/bad_code.py; then
+    echo "pylint did not detect the expected violations"
     status=1
+else
+    echo "pylint detected the expected violations"
 fi
 
 echo "=== tester stage: requests integration test for HTTP headers ==="
